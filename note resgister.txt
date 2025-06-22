@@ -1,0 +1,190 @@
+note resgister
+formic
+import axios from "axios";
+import { useFormik } from "formik";
+import { useNavigate } from "react-router";
+import { z } from "zod";
+import { Input } from "../components/input/input";
+
+function ErrorMessage({ message }) {
+    return(
+        <>
+            <div className="text-red-500 text-sm">{message}</div>
+        </>
+    )
+}
+
+const tokenCybersoft = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZW5Mb3AiOiJCb290Y2FtcCBETiAxNCIsIkhldEhhblN0cmluZyI6IjE1LzEwLzIwMjUiLCJIZXRIYW5UaW1lIjoiMTc2MDQ4NjQwMDAwMCIsIm5iZiI6MTczMDMzMjgwMCwiZXhwIjoxNzYwNjU5MjAwfQ.P0-adChuwGt_dA8kRO_sxBjpC2NVGZr7B0F_3jou79s";
+const RegisterSchema = z.object({
+    email: z.string().email("Invalid email").nonempty("Email cannot be blank"),
+    password: z.string().nonempty("Password cannot be blank").min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string()
+        .nonempty("Confirm password không được để trống")
+        .min(6, "Confirm password phải có ít nhất 6 ký tự"),
+    phoneNumber: z.string().regex(/^\d{10}$/, "Phone must be a valid phone number").optional(),
+    fullName: z.string().nonempty("Name cannot be blank"),
+    user: z.string().nonempty("User cannot be blank"),
+    groupCode: z.string().regex(/^\d+$/, "Group code must be a number").optional(),
+});
+
+
+export default function Register() {
+  const navigate = useNavigate();
+    const formik = useFormik({
+        initialValues: {
+            user: "",
+            password: "",
+            confirmPassword: "",
+            fullName: "",
+            email: "",
+            phoneNumber:"",
+        },
+        onSubmit (values) {
+            // console.log(values);
+            // console.log("Sending data:", {
+            //   taiKhoan: values.user,
+            //   matKhau: values.password,
+            //   email: values.email,
+            //   soDt: values.phoneNumber,
+            //   maNhom: values.groupCode,
+            //   hoTen: values.fullName
+            // });
+            const data = {
+              id: 2009,
+              taiKhoan: values.user,
+              password: values.password,
+              email: values.email,
+              phone: values.phoneNumber,
+              WebGLRenderbuffer,
+              role: "KhachHang",
+              maNhom: values.groupCode,
+              name: values.fullName,
+              skill: [],
+              certification: []
+            };
+            axios.post("https://fiverrnew.cybersoft.edu.vn/api/auth/signup",
+              data,{
+                headers: {
+                  "TokenCybersoft": tokenCybersoft,
+                  "Content-Type": "application/json-patch+json"
+                }
+            })
+            .then((res) => {
+                console.log("Registration successful:", res.data);
+                alert("Registration successful");
+
+                // Chuyển hướng đến trang đăng nhập sau khi đăng ký thành công
+                navigate("/login");
+            })
+            .catch((err) => {
+                console.error("Registration error:", err);
+                alert("Registration failed: " + err.response.data);
+            });
+        },
+            // Sửa lỗi console.errors thành console.error
+        validate(values) {
+            try {
+                // kiểm tra values có khớp với lại registerschema hay không
+                RegisterSchema.parse(values);
+            } catch (error) {
+                const errors = error.errors.reduce((acc, curr) => {
+                    acc[curr.path[0]] = curr.message;
+                    return acc;
+                }, {});
+                console.error("Validation error:", errors); // Sửa console.errors thành console.error
+                return errors;
+            }
+            return {};
+        }
+    });
+
+
+
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#161623] to-[#23243a]">
+          <div className="max-w-4xl p-8 rounded-xl shadow-xl bg-[#1F1F2D]">
+          <div className="flex flex-row gap-10">
+            <div className="flex flex-col justify-center items-center">
+                <img src="https://www.naijatechguide.com/wp-content/uploads/2018/10/fiverr-overview.jpeg" className="w-120 h-100"/>
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-center text-white ">Register</h1>
+              <h3 className="text-shadow-white font-bold text-center text-white mb-8">Please fill in all information</h3>
+                    <form onSubmit={formik.handleSubmit} className="space-y-6">
+                      <label className="text-white">
+                          User
+                          <Input
+                          {...formik.getFieldProps("user")}
+                          className="w-full px-4 py-3 rounded-lg bg-[#23243a]
+                          text-white border border-gray-700 focus:outline-none focus:ring-2
+                          focus:ring-indigo-500 mt-2 mb-2"/>
+                          <ErrorMessage message={formik.touched.user && formik.errors.user} field="user" />
+                      </label>
+                        <label className="text-white" >
+                          Password
+                          <Input
+                          type="password"
+                          {...formik.getFieldProps("password")}
+                          className="w-full px-4 py-3 rounded-lg bg-[#23243a]
+                          text-white border border-gray-700 focus:outline-none 
+                          focus:ring-2 focus:ring-indigo-500 mt-2 mb-4" />
+                          <ErrorMessage message={formik.touched.password && formik.errors.password} field="password" />
+                        </label>
+                        <label className="text-white" >
+                          Confirm Password
+                          <Input
+                          type="password"
+                          {...formik.getFieldProps("confirmPassword")}
+                          className="w-full px-4 py-3 rounded-lg bg-[#23243a]
+                          text-white border border-gray-700 focus:outline-none 
+                          focus:ring-2 focus:ring-indigo-500 mt-2 mb-4" />
+                          <ErrorMessage message={formik.touched.confirmPassword && formik.errors.confirmPassword} field="confirmPassword" />
+                        </label>
+                        
+                        <label className="text-white" >
+                          Full Name
+                          <Input
+                          {...formik.getFieldProps("fullName")}
+                          className="w-full px-4 py-3 rounded-lg bg-[#23243a]
+                          text-white border border-gray-700 focus:outline-none 
+                          focus:ring-2 focus:ring-indigo-500 mt-2 mb-4" />
+                          <ErrorMessage message={formik.touched.fullName && formik.errors.fullName} field="fullName" />
+                        </label>
+                        <label className="text-white" >
+                          Email
+                          <Input
+                          {...formik.getFieldProps("email")}
+                          className="w-full px-4 py-3 rounded-lg bg-[#23243a]
+                          text-white border border-gray-700 focus:outline-none 
+                          focus:ring-2 focus:ring-indigo-500 mt-2 mb-4" />
+                          <ErrorMessage message={formik.touched.email && formik.errors.email} field="email" />
+                        </label>
+                        <label className="text-white" >
+                          Phone
+                          <Input
+                          {...formik.getFieldProps("phoneNumber")}
+                          className="w-full px-4 py-3 rounded-lg bg-[#23243a]
+                          text-white border border-gray-700 focus:outline-none 
+                          focus:ring-2 focus:ring-indigo-500 mt-2 mb-4" />
+                          <ErrorMessage message={formik.touched.phoneNumber && formik.errors.phoneNumber} field="phoneNumber" />
+                        </label>
+                        <div className="flex gap-4">
+                          <button
+                            className="w-full py-4 rounded-lg bg-indigo-600
+                            hover:bg-indigo-700 text-white font-semibold transition">
+                            Create Account  
+                          </button>
+                          <button onClick={() => navigate("/login")}
+                            className="w-full py-4 rounded-lg bg-indigo-600
+                            hover:bg-indigo-700 text-white font-semibold transition">
+                            Login 
+                          </button>
+                        </div>
+
+                    </form>
+             </div>
+            </div>
+          </div>
+        </div>
+      );
+}
